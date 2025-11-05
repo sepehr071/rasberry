@@ -2,3 +2,4 @@ livekit-agents[silero,turn-detector,images]
 livekit-plugins-google
 livekit-plugins-noise-cancellation
 python-dotenv
+livekit
