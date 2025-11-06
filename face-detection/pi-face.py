@@ -133,7 +133,7 @@ def launch_agent():
         # Use 'start cmd /K' to reliably open a new console window and keep it open.
         # We use 'call' to ensure conda activate runs properly in the new shell.
         # We must use shell=True for the 'start' command to be recognized.
-        command = f'start cmd /K "call conda activate facerasberry && cd /d "{agent_dir}" && python agent.py console"'
+        command = f'start cmd /K "call conda activate jarvis && cd /d "{agent_dir}" && python agent.py console"'
         
         # Launch in a new console window (Windows specific)
         AGENT_PROCESS = subprocess.Popen(

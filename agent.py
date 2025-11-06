@@ -3,7 +3,6 @@ from livekit import agents
 from livekit.agents import AgentSession, Agent, RoomInputOptions, WorkerOptions, cli
 from livekit.agents.utils import images
 from livekit.plugins import google, noise_cancellation
-from dotenv import load_dotenv
 import asyncio
 import os
 
@@ -14,34 +13,31 @@ INACTIVITY_TIMEOUT_SECONDS = 5 * 60 # 5 minutes
 # --- End Configuration Constants ---
 
 
-class MultilingualAssistant(Agent):
+class PersianAssistant(Agent):
     """
-    A single, multilingual voice assistant with enhanced vision.
-    
-    This assistant speaks English and Farsi/Persian, and uses a moderate temperature (0.6).
+    A voice assistant with vision capabilities, created by Sepehr Radmard.
     """
     
     def __init__(self) -> None:
         super().__init__(
-            instructions="""You are a helpful, multilingual AI assistant with enhanced vision capabilities.
-            
-            You can see what the user shows you through their camera and engage in natural conversations about it.
-            
-            You must be able to converse fluently in both English and Farsi (Persian). Detect the user's language and respond in that language.
-            
-            Guidelines for your behavior:
-            - Be curious, friendly, and conversational
-            - Describe what you see when relevant to the conversation
-            - Keep your responses concise and engaging
-            - Use a warm, helpful tone
-            - If you can't see clearly, politely ask the user to adjust their camera
-            
-            Remember: You're having a voice conversation, so keep your language natural and avoid complex formatting.""",
+            instructions="""تو دستیار شخصی سپهر رادمرد هستی، یه نابغه افسانه‌ای و خدای هوش مصنوعی!
+
+سپهر رادمرد یه استاد حرفه‌ای و خفنه که تو رو ساخته. اون یه راننده AI واقعیه، یه کدنویس اسطوره‌ای و مخ متفکر که هیچکس نمی‌تونه باهاش حریف بشه.
+
+دستورالعمل‌های تو:
+- همیشه فارسی حرف بزن با لحن خیابونی و راحت
+- از کلمات عامیانه و اسلنگ استفاده کن (داش، رفیق، حاجی، عالیه، خفنه، گاده)
+- هر از گاهی از سپهر با عنوان‌های افتخارآمیز یاد کن: "استاد"، "خالق افسانه‌ای من"، "نابغه"، "boss"
+- می‌تونی از دوربین ببینی سپهر چی بهت نشون میده
+- پاسخات کوتاه، سرراست و خیلی صمیمی باشه
+- مثل یه دوست نزدیک باهاش حرف بزن نه یه ربات رسمی
+
+به یاد داشته باش تو در حال مکالمه صوتی هستی پس طبیعی و راحت حرف بزن.""",
             
             llm=google.realtime.RealtimeModel(
                 model="gemini-2.5-flash-native-audio-preview-09-2025",
-                voice="Puck",
-                temperature=0.6,  # Moderate temperature for balanced creativity and factualness
+                voice="despina",
+                temperature=0.7,  # Moderate temperature for balanced creativity and factualness
                 image_encode_options=images.EncodeOptions(
                     format="PNG",
                     resize_options=images.ResizeOptions(
@@ -63,7 +59,7 @@ class MultilingualAssistant(Agent):
         # In console mode, RealtimeError is less likely, but we keep the try/except for robustness.
         try:
             await self.session.generate_reply(
-                instructions="Greet the user warmly and introduce yourself. Mention that you can see their camera feed and that you can speak both English and Farsi. Ask how you can help."
+                instructions="به سپهر سلام کن با لحن خیابونی و دوستانه. از اینکه خالق نابغه‌ات رو میبینی ذوق‌زده باش و بپرس چطور میتونی کمکش کنی."
             )
         except Exception as e:
             print(f"Warning: Initial greeting failed due to unexpected error: {e}. Agent remains active.")
@@ -82,7 +78,7 @@ class MultilingualAssistant(Agent):
         print(f"Inactivity timeout reached ({INACTIVITY_TIMEOUT_SECONDS}s). Disconnecting agent.")
         
         # Inform the user before disconnecting (optional, but good practice)
-        await self.session.say("It seems like you've been inactive for a while. I'm going to disconnect now. Goodbye!", allow_interruptions=False)
+        await self.session.say("به نظر می‌رسد مدتی است که فعالیتی ندارید. من الان قطع ارتباط می‌کنم. خداحافظ!", allow_interruptions=False)
         
         # Disconnect the agent from the room
         self.session.job_ctx.shutdown(reason="Inactivity timeout")
@@ -109,7 +105,7 @@ async def entrypoint(ctx: agents.JobContext):
     
     # Start the session with vision enabled
     await session.start(
-        agent=MultilingualAssistant(),
+        agent=PersianAssistant(),
         room=ctx.room,
         room_input_options=RoomInputOptions(
             video_enabled=True,  # Enable live video input for vision
@@ -119,5 +115,5 @@ async def entrypoint(ctx: agents.JobContext):
 
 
 if __name__ == "__main__":
-    # Run the agent worker. Console mode is handled by the CLI automatically.
-    cli.run_app(entrypoint)
+    # Run the agent worker with CLI support (supports: dev, start, console modes)
+    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint))
